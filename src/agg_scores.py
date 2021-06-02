@@ -2,10 +2,6 @@
 Post-processing script.
 Learning curve data are generated for different splits of a dataset.
 This script aggregates LC results from different runs (i.e., different data splits).
-
-Example:
-python src/agg_results_from_runs.py --res_dir trn/ml.ADRP_pocket1_dock.lc/
-python src/agg_results_from_runs.py --res_dir trn/ml.ADRP-ADPR_pocket1_dock.lc/
 """
 import warnings
 warnings.filterwarnings('ignore')

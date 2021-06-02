@@ -24,7 +24,6 @@ from pandas.api.types import is_string_dtype
 from sklearn.preprocessing import LabelEncoder
 import joblib
 
-from datasplit.splitter import data_splitter
 from ml.keras_utils import save_krs_history, plot_prfrm_metrics, r2_krs
 from ml.evals import calc_preds, calc_scores, dump_preds
 from utils.utils import dump_dict, verify_path
@@ -45,16 +44,13 @@ class LearningCurve():
             X, Y,
             meta=None,
             cv_lists=None,  # (tr_id, vl_id, te_id)
-
             n_splits: int=1,
             mltype: str='reg',
-
             lc_step_scale: str='log2',
             min_size = 0,
             max_size = None,
             lc_sizes: int=None,
             lc_sizes_arr: list=[],
-
             print_fn=print,
             save_model=False,
             outdir=Path('./')):
@@ -87,11 +83,8 @@ class LearningCurve():
         self.meta = pd.DataFrame(meta).reset_index(drop=True)
 
         self.cv_lists = cv_lists
-
         self.n_splits = n_splits
         self.mltype = mltype
-
-        # self.cv_folds_arr = cv_folds_arr
 
         self.lc_step_scale = lc_step_scale 
         self.min_size = min_size
@@ -103,7 +96,6 @@ class LearningCurve():
         self.save_model = save_model
         self.outdir = Path( outdir )
 
-        # import ipdb; ipdb.set_trace()
         self.create_split_dcts()
         self.create_tr_sizes_list()
         # self.trn_single_subset() # TODO: implement this method for better modularity
@@ -121,28 +113,6 @@ class LearningCurve():
 
         # Use lists passed as input arg
         if self.cv_lists is not None:
-        #     tr_id = self.cv_lists[0]
-        #     vl_id = self.cv_lists[1]
-        #     te_id = self.cv_lists[2]
-        #     assert (tr_id.shape[1]==vl_id.shape[1]) and (tr_id.shape[1]==te_id.shape[1]), 'tr, vl, and te must have the same number of folds.'
-        #     self.cv_folds = tr_id.shape[1]
-
-        #     # Calc the split ratio if cv=1
-        #     # if self.cv_folds == 1:
-        #     #     total_samples = tr_id.shape[0] + vl_id.shape[0] + te_id.shape[0]
-        #     #     self.vl_size = vl_id.shape[0] / total_samples
-        #     #     self.te_size = te_id.shape[0] / total_samples
-
-        #     if self.cv_folds_arr is None:
-        #         self.cv_folds_arr = [f+1 for f in range(self.cv_folds)]
-
-        #     for fold in range(tr_id.shape[1]):
-        #         # cv_folds_arr contains the specific folds we wish to process
-        #         if fold+1 in self.cv_folds_arr:
-        #             tr_dct[fold] = tr_id.iloc[:, fold].dropna().values.astype(int).tolist()
-        #             vl_dct[fold] = vl_id.iloc[:, fold].dropna().values.astype(int).tolist()
-        #             te_dct[fold] = te_id.iloc[:, fold].dropna().values.astype(int).tolist()
-
             tr_dct[0] = self.cv_lists[0]
             vl_dct[0] = self.cv_lists[1]
             te_dct[0] = self.cv_lists[2]
@@ -162,40 +132,9 @@ class LearningCurve():
                 vl_dct[0] = vl_id
                 te_dct[0] = te_id
 
-                # if self.mltype=='cls':
-                #     te_method='strat'
-                #     cv_method='strat'
-                # else:
-                #     te_method='simple'
-                #     cv_method='simple'
-
-                # kwargs = {'data': self.X, 'te_method' :'simple', 'cv_method': 'simple',
-                #           'te_size': 0.1, 'mltype': self.mltype, 'ydata': self.Y,
-                #           'split_on': None, 'print_fn': print}
-
-                # self.print_fn('\nGenerate data splits ...')
-                # tr_dct, vl_dct, te_dct = data_splitter( n_splits=self.n_splits, **kwargs )
             else:
                 raise ValueError(f'n_splits must be int>1. Got {n_splits}.')
-            """
-                # cv is sklearn splitter
-                self.cv_folds = cv.get_n_splits()
 
-            if cv_folds == 1:
-                self.vl_size = cv.test_size
-
-            # Create sklearn splitter 
-            if self.mltype == 'cls':
-                if self.Y.ndim > 1 and self.Y.shape[1] > 1:
-                    splitter = self.cv.split(self.X, np.argmax(self.Y, axis=1))
-            else:
-                splitter = self.cv.split(self.X, self.Y)
-
-            # Generate the splits
-            for fold, (tr_vec, vl_vec) in enumerate(splitter):
-                tr_dct[fold] = tr_vec
-                vl_dct[fold] = vl_vec
-            """
         # Keep dicts
         self.tr_dct = tr_dct
         self.vl_dct = vl_dct
@@ -212,15 +151,19 @@ class LearningCurve():
 
         else:
             # Fixed spacing
+            key = list(self.tr_dct.keys())[0]
+            total_trn_samples = len(self.tr_dct[key])
             if self.max_size is None:
-                key = list(self.tr_dct.keys())[0]
-                self.max_size = len(self.tr_dct[key]) # total number of available training samples
+                self.max_size = total_trn_samples # total number of available training samples
+            else:
+                if self.max_size > total_trn_samples:
+                    self.max_size = total_trn_samples
 
             # Full vector of sizes
             # (we create a vector with very large values so that we later truncate it with max_size)
             scale = self.lc_step_scale.lower()
             if scale == 'linear':
-                m = np.linspace(self.min_size, self.max_size, self.lc_sizes+1)[1:]
+                m = np.linspace(self.min_size, self.max_size, self.lc_sizes)
             else:
                 # we create very large vector m, so that we later truncate it with max_size
                 if scale == 'log2':
@@ -232,35 +175,8 @@ class LearningCurve():
                         # www.researchgate.net/post/is_the_logarithmic_spaced_vector_the_same_in_any_base
                         pw = np.linspace(0, self.lc_sizes-1, num=self.lc_sizes) / (self.lc_sizes-1)
                         m = self.min_size * (self.max_size/self.min_size) ** pw
-                        # m = 2 ** np.linspace(self.min_size, self.max_size, self.lc_sizes)
-                        m = np.array( [int(i) for i in m] )
-                        self.tr_sizes = m
-                        self.print_fn('\nTrain sizes: {}\n'.format(self.tr_sizes))
-                        return None
 
-            # TODO: figure out if the code below is still necessary
             m = np.array( [int(i) for i in m] ) # cast to int
-
-            # Set min size
-            idx_min = np.argmin( np.abs( m - self.min_size ) )
-            if m[idx_min] > self.min_size:
-                m = m[idx_min:]  # all values larger than min_size
-                m = np.concatenate( (np.array([self.min_size]), m) )  # preceed arr with specified min_size
-            else:
-                m = m[idx_min:]
-
-            # Set max size
-            idx_max = np.argmin( np.abs( m - self.max_size ) )
-            if m[idx_max] > self.max_size:
-                m = list(m[:idx_max])    # all values EXcluding the last one
-                m.append(self.max_size)
-            else:
-                m = list(m[:idx_max+1])  # all values INcluding the last one
-                m.append(self.max_size) # TODO: should we append this??
-                # If the diff btw max_samples and the latest sizes (m[-1] - m[-2]) is "too small",
-                # then remove max_samples from the possible sizes.
-                if 0.5*m[-3] > (m[-1] - m[-2]): m = m[:-1] # heuristic to drop the last size
-
             self.tr_sizes = m
         # --------------------------------------------
 

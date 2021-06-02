@@ -86,5 +86,3 @@ def dump_dict(dct, outpath='./dict.txt'):
 def get_print_func(logger=None):
     """ Returns the python 'print' function if logger is None. Othersiwe, returns logger.info. """
     return print if logger is None else logger.info
-
-

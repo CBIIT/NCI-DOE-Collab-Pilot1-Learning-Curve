@@ -23,11 +23,9 @@ from ml.data import extract_subset_fea
 
 import learningcurve as lc
 from learningcurve.lrn_crv import LearningCurve
-import learningcurve.lc_plots as lc_plots
-from utils.k_tuner import read_hp_prms
 
 # File path
-filepath = Path(__file__).resolve().parent
+fdir = Path(__file__).resolve().parent
 
 
 def parse_args(args):
@@ -35,7 +33,7 @@ def parse_args(args):
     # Input data
     parser.add_argument('-dp', '--datapath',
                         required=True,
-                        default=None,
+                        default=fdir/"../data/ml.dfs/July2020/data.ctrp.dd.ge/data.ctrp.dd.ge.parquet",
                         type=str,
                         help='Full path to data (default: None).')
     # Pre-computed data splits
@@ -89,11 +87,11 @@ def parse_args(args):
                         default='log',
                         type=str,
                         choices=['log', 'linear'],
-                        help='Scale of progressive sampling of subset sizes in a LC (log2, log, log10, linear) (default: log).')
+                        help='Scale of progressive sampling of subset sizes in a LC (log, linear) (default: log).')
     parser.add_argument('--min_size',
-                        default=128,
+                        default=512,
                         type=int,
-                        help='The lower bound for the subset size (default: 128).')
+                        help='The lower bound for the subset size (default: 512).')
     parser.add_argument('--max_size',
                         default=None,
                         type=int,
@@ -107,16 +105,9 @@ def parse_args(args):
                         type=int,
                         default=None,
                         help='List of the actual sizes in the LC plot (default: None).')
-    parser.add_argument('--save_model',
-                        action='store_true',
-                        help='Whether to trained models (default: False).')
-    parser.add_argument('--plot_fit',
-                        action='store_true',
-                        help='Whether to generate the fit (default: False).')
     # Model
     parser.add_argument('--ml',
                         default='lgb', type=str,
-                        ##choices=['lgb', 'nn_reg0', 'nn_reg1', 'nn_attn0', 'nn_attn1'],
                         choices=['lgb', 'nn_reg0', 'nn_reg1'],
                         help='Choose ML model (default: lgb).')
     # NN HPs
@@ -141,15 +132,6 @@ def parse_args(args):
                         help='max_depth (default: -1).')
     parser.add_argument('--learning_rate', default=0.1, type=float,
                         help='learning_rate (default: 0.1).')
-    # HP path
-    # parser.add_argument('--ls_hpo_dir', default=None, type=str,
-    #                     help='Path to a single set of HP names and values.')
-    # parser.add_argument('--ps_hpo_dir', default=None, type=str,
-    #                     help='Path to a dir with multiple sets of HP names and values.')
-    # parser.add_argument('--hpo_metric', default='mean_absolute_error', type=str,
-    #                     choices=['mean_absolute_error'],
-    #                     help='Metric for HPO evaluation. Required for UPF workflow on Theta HPC (default: mean_absolute_error).')
-
     # Other
     parser.add_argument('--n_jobs', default=4, type=int, help='Default: 4.')
 
@@ -161,8 +143,11 @@ def run(args):
     # import ipdb; ipdb.set_trace()
     t0 = time()
     datapath = Path(args['datapath']).resolve()
-    # ls_hpo_dir = None if args['ls_hpo_dir'] is None else Path(args['ls_hpo_dir']).resolve()
-    # ps_hpo_dir = None if args['ps_hpo_dir'] is None else Path(args['ps_hpo_dir']).resolve()
+
+    if args['max_size'] is not None:
+        assert args['min_size'] < args['max_size'], f"min train size (min_size={args['min_size']}) "\
+                                                    f"must be smaller than max train size "\
+                                                    f"(max_size={args['max_size']})."
 
     if args['splitdir'] is None:
         splitdir = None
@@ -176,7 +161,7 @@ def run(args):
     if args['gout'] is not None:
         gout = Path(args['gout']).resolve()
     else:
-        gout = filepath.parent/'lc.trn'
+        gout = fdir.parent/'lc.trn'
         gout = gout/datapath.with_suffix('.lc').name
     args['gout'] = str(gout)
     os.makedirs(gout, exist_ok=True)
@@ -188,7 +173,7 @@ def run(args):
         rout = gout/args['rout']
     else:
         if splitdir is None:
-            rout = gout
+            rout = gout/'run_0'
         else:
             rout = gout/f'split_{split_id}'
     args['rout'] = str(rout)
@@ -199,7 +184,7 @@ def run(args):
     # -----------------------------------------------
     lg = Logger(rout/'lc.log')
     print_fn = get_print_func(lg.logger)
-    print_fn(f'File path: {filepath}')
+    print_fn(f'File path: {fdir}')
     print_fn(f'\n{pformat(args)}')
     dump_dict(args, outpath=rout/'trn.args.txt')
 
@@ -233,7 +218,6 @@ def run(args):
         single_split_files = glob(str(splitdir/split_pattern))
 
         # Get indices for the split
-        # assert len(single_split_files) >= 2, f'The split {s} contains only one file.'
         for id_file in single_split_files:
             if 'tr_id' in id_file:
                 tr_id = load_data(id_file).values.reshape(-1,)
@@ -254,23 +238,6 @@ def run(args):
         ml_model_def = lgb.LGBMRegressor
         mltype = 'reg'
 
-        # if (ps_hpo_dir is not None):
-        #     pass
-
-        # if (ls_hpo_dir is not None):
-        #     ls_hpo_fpath = ls_hpo_dir/'best_hps.txt'
-        #     ml_init_kwargs = read_hp_prms(ls_hpo_fpath)
-        #     ml_init_kwargs['random_state'] = None
-
-        # if (ls_hpo_dir is None) and (ps_hpo_dir is None):
-        #     ml_init_kwargs = {'n_estimators': args['n_estimators'],
-        #                       'max_depth': args['max_depth'],
-        #                       'learning_rate': args['learning_rate'],
-        #                       'num_leaves': args['num_leaves'],
-        #                       'n_jobs': args['n_jobs'],
-        #                       'random_state': None
-        #                       }
-
         ml_init_kwargs = {'n_estimators': args['n_estimators'],
                           'max_depth': args['max_depth'],
                           'learning_rate': args['learning_rate'],
@@ -284,8 +251,8 @@ def run(args):
 
     elif args['ml'] == 'nn_reg0':
         # Keras model def
-        from models.keras_model import (nn_reg0_model_def, nn_attn0_model_def,
-                                        data_prep_nn0_def, model_callback_def)
+        from models.keras_model import (nn_reg0_model_def, data_prep_nn0_def,
+                                        model_callback_def)
         framework = 'keras'
         mltype = 'reg'
         keras_callbacks_def = model_callback_def
@@ -293,25 +260,6 @@ def run(args):
 
         if (args['ml'] == 'nn_reg0'):
             ml_model_def = nn_reg0_model_def
-        elif (args['ml'] == 'nn_attn0'):
-            ml_model_def = nn_attn0_model_def
-
-        # if (ps_hpo_dir is not None):
-        #     ml_init_kwargs = {'input_dim': xdata.shape[1],
-        #                       'batchnorm': args['batchnorm']}
-
-        # elif (ls_hpo_dir is not None):
-        #     ls_hpo_fpath = ls_hpo_dir/'best_hps.txt'
-        #     ml_init_kwargs = read_hp_prms(ls_hpo_fpath)
-        #     ml_init_kwargs['input_dim'] = xdata.shape[1]
-        #     ml_init_kwargs['batchnorm'] = args['batchnorm']
-
-        # elif (ls_hpo_dir is None) and (ps_hpo_dir is None):
-        #     ml_init_kwargs = {'input_dim': xdata.shape[1],
-        #                       'dr_rate': args['dr_rate'],
-        #                       'opt_name': args['opt'],
-        #                       'lr': args['lr'],
-        #                       'batchnorm': args['batchnorm']}
 
         ml_init_kwargs = {'input_dim': xdata.shape[1],
                           'dr_rate': args['dr_rate'],
@@ -324,8 +272,8 @@ def run(args):
         keras_clr_kwargs = {}
 
     elif args['ml'] == 'nn_reg1':
-        from models.keras_model import (nn_reg1_model_def, nn_attn1_model_def,
-                                        data_prep_nn1_def, model_callback_def)
+        from models.keras_model import (nn_reg1_model_def, data_prep_nn1_def,
+                                        model_callback_def)
         framework = 'keras'
         mltype = 'reg'
         keras_callbacks_def = model_callback_def
@@ -333,31 +281,9 @@ def run(args):
 
         if (args['ml'] == 'nn_reg1'):
             ml_model_def = nn_reg1_model_def
-        elif (args['ml'] == 'nn_attn1'):
-            ml_model_def = nn_attn1_model_def
 
         x_ge = extract_subset_fea(xdata, fea_list=['ge'], fea_sep='_')
         x_dd = extract_subset_fea(xdata, fea_list=['dd'], fea_sep='_')
-
-        # if (ps_hpo_dir is not None):
-        #     ml_init_kwargs = {'in_dim_ge': x_ge.shape[1],
-        #                       'in_dim_dd': x_dd.shape[1],
-        #                       'batchnorm': args['batchnorm']}
-
-        # elif (ls_hpo_dir is not None):
-        #     ls_hpo_fpath = ls_hpo_dir/'best_hps.txt'
-        #     ml_init_kwargs = read_hp_prms( ls_hpo_fpath )
-        #     ml_init_kwargs['in_dim_ge'] = x_ge.shape[1]
-        #     ml_init_kwargs['in_dim_dd'] = x_dd.shape[1]
-        #     ml_init_kwargs['batchnorm'] = args['batchnorm']
-
-        # elif (ls_hpo_dir is None) and (ps_hpo_dir is None):
-        #     ml_init_kwargs = {'in_dim_ge': x_ge.shape[1],
-        #                       'in_dim_dd': x_dd.shape[1],
-        #                       'dr_rate': args['dr_rate'],
-        #                       'opt_name': args['opt'],
-        #                       'lr': args['lr'],
-        #                       'batchnorm': args['batchnorm']}
 
         ml_init_kwargs = {'in_dim_ge': x_ge.shape[1],
                           'in_dim_dd': x_dd.shape[1],
@@ -390,8 +316,7 @@ def run(args):
                     'max_size': args['max_size'],
                     'lc_sizes_arr': args['lc_sizes_arr'],
                     'outdir': rout,
-                    'print_fn': print_fn
-                    }
+                    'print_fn': print_fn}
 
     lc_trn_args = {'framework': framework,
                    'n_jobs': args['n_jobs'],
@@ -400,12 +325,9 @@ def run(args):
                    'ml_fit_args': ml_fit_kwargs,
                    'data_prep_def': data_prep_def,
                    'keras_callbacks_def': keras_callbacks_def,
-                   'keras_clr_args': keras_clr_kwargs,
-                   # 'ps_hpo_dir': ps_hpo_dir
-                   }
+                   'keras_clr_args': keras_clr_kwargs}
 
     # LC object
-    # import ipdb; ipdb.set_trace()
     lc_obj = LearningCurve(X=xdata, Y=ydata, meta=meta, **lc_init_args)
     lc_scores = lc_obj.trn_learning_curve(**lc_trn_args)
 
@@ -422,7 +344,7 @@ def run(args):
         print_fn('Runtime: {:.1f} mins'.format((time()-t0)/60))
 
     print_fn('Done.')
-    lg.kill_logger()
+    lg.close_logger()
     del xdata, ydata
 
     return None

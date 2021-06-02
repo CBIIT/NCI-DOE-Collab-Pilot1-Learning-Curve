@@ -55,11 +55,9 @@ class Logger():
         #return logger
 
 
-    def kill_logger(self):
+    def close_logger(self):
         n_seps = 70
-        self.logger.info('\nKill logger.')
+        self.logger.info('\nClose logger.')
         self.logger.info('{}\n'.format('-' * n_seps))
         self.logger.removeHandler(self.fileHandler)
         self.logger.removeHandler(self.consoleHandler)
-
-        
