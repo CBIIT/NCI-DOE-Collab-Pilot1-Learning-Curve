@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Example:
-# bash scripts/lc_lgb.bash ctrp 16 none
-# bash scripts/lc_lgb.bash gdsc1 16 none
-# bash scripts/lc_lgb.bash gdsc2 16 none
+# bash scripts/lc_lgb.bash ctrp
+# bash scripts/lc_lgb.bash gdsc1
+# bash scripts/lc_lgb.bash gdsc2
 
 SOURCE=$1
 
