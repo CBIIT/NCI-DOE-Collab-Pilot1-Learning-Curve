@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Example:
-# lc_keras.bash ctrp nn_reg0 0
+# lc_keras.bash ctrp 0
 
 SOURCE=$1
 DEVICE=$2
