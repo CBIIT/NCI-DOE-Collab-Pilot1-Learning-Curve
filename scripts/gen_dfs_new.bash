@@ -15,7 +15,8 @@ r2fit_th=0.3
 # sources=('gdsc1' 'gdsc2' 'ctrp')
 sources=('ctrp')
 
-drug_path=$rawdir/drug_info/dd.mordred.with.nans
+# drug_path=$rawdir/drug_info/dd.mordred.with.nans
+drug_path=$rawdir/combined_mordred_descriptors.txt
 
 for SOURCE in ${sources[@]}; do
     python src/build_dfs_july2020.py \

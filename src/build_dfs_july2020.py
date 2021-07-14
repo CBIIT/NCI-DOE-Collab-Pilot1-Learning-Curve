@@ -148,9 +148,11 @@ def load_dd(fpath, print_fn=print, dropna_th=0.1, float_type=np.float32, src=Non
     dd = pd.read_csv(fpath, sep='\t', na_values=na_values)
     dd.rename(columns={'ID': 'DRUG'}, inplace=True)
 
-    # dd = add_fea_prfx(dd, prfx=fea_prfx_dct['dd'], id0=fea_id0)
-
-    if 'nci60' in src:
+    if "combined_mordred_descriptors" in fpath:
+        # Descriptors that were prepared by Maulik and are available in MoDaC
+        fea_id0 = 1
+        dd = add_fea_prfx(dd, prfx=fea_prfx_dct['dd'], id0=fea_id0)
+    elif 'nci60' in src:
         dd = dropna(dd, axis=0, th=dropna_th)
         fea_id0 = 2
     else:
@@ -282,7 +284,7 @@ def parse_args(args):
 
 
 def run(args):
-    # import ipdb; ipdb.set_trace(context=5)
+    # import pdb; pdb.set_trace()
     t0 = time()
     rsp_cols = ['AUC', 'AUC1', 'EC50', 'EC50se', 'R2fit',
                 'Einf', 'IC50', 'HS', 'AAC1', 'DSS1']
@@ -344,6 +346,8 @@ def run(args):
         mem = 0 if aa.shape[1] == 0 else sys.getsizeof(aa)/1e9
         print_fn('Memory occupied by {} features: {} ({:.1f} GB)'.format(
             fea_name, len(cols), mem))
+
+    print_fn(f"\nData final: {data.shape}")
 
     # Plot histograms of target variables
     plot_rsp_dists(data, rsp_cols=rsp_cols, savepath=outdir/'rsp_dists.png')

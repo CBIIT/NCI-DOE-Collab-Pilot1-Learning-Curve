@@ -1,9 +1,11 @@
 ### Description of the algorithm
 A dataset is split into training (T), validation (V), and test (E). The model is trained on subsets of the training set (T). In order to support early stopping, the training is terminated if the generalization performance on the validation set V has not improved over a predefned number of training iterations. Upon training completion, the model predicts the response for each cell-drug pair in the test set E. Note that models use the same validation and test sets (V and E) irrespective of the training set size. The aggregated performance scores are than plotted as a function of the training set size.
 
+
 ### Expected Outcomes
 * Raw learning curve data (LCraw) - csv file that contains the prediction scores for each subset of training samples
 * Learning curves generated from LCraw - LCraw are then used to generate images of the learning curve plots 
+
 
 ### Setup
 To set up the Python environment needed to generate learning curves:
@@ -16,22 +18,24 @@ To set up the Python environment needed to generate learning curves:
    conda activate lrn_crv
 ```
 
-To download the processed data needed to train the models and generate learning curves:
+To download data that is required to build a tidy (tabular) dataset. The tidy dataset is then used to train the models and generate learning curves:
 1. Create an account on the Model and Data Clearinghouse [MoDaC](modac.cancer.gov). 
 2. Follow the instructions in the Training section below.
 3. When prompted by the training and test scripts, enter your MoDaC credentials.
 
-### Generte the ML dataset
+
+### Generte the tidy ML dataset
 ```bash
 ./scripts/gen_dfs_new.bash
 ```
 
 #### Description of the Data
 The drug response dataframe contains tabular data for training models and generating learning curves: `data/ml.dfs/July2020/data.ctrp.dd.ge/data.ctrp.dd.ge.parquet`
-* The dataframe contains 254566 of unique cell-drug pairs (samples, rows) and 2606 columns (including RNA-Seq and drug descritors, and metadata).
-* There are 887 unique cell lines and 544 unique drugs (note that not all cell-drug combinations were screened)
+* The dataframe contains 254566 of unique cell-drug pairs (samples, rows) and 2815 columns (including RNA-Seq and drug descritors, and metadata).
+* There are 812 unique cell lines and 495 unique drugs (note that not all cell-drug combinations were screened)
 * RNA-Seq: 976 features (genes)
-* Mordred drug descriptors: 1613 features (descriptors)
+* Mordred drug descriptors: 1825 features (descriptors)
+ 
 
 ### Train models and generate learning curves
 To train LighGBM regressor and generate learning curves:

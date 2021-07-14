@@ -2,24 +2,26 @@
 
 # Example:
 # lc_keras.bash ctrp 0
+# lc_keras.bash 0
 
-SOURCE=$1
-DEVICE=$2
+DEVICE=$1
 # export CUDA_VISIBLE_DEVICES=$3
 export CUDA_VISIBLE_DEVICES=$DEVICE
 
+src=ctrp
+
 model="nn_reg0"
-outdir=lc.out.${SOURCE}.${model}
+outdir=lc.out.${src}.${model}
 mkdir -p $outdir
 echo "Outdir $outdir"
 
-echo "Source: $SOURCE"
+echo "Source: $src"
 echo "Model:  $model"
 echo "CUDA:   $CUDA_VISIBLE_DEVICES"
 
 data_version=July2020
-dpath=data/ml.dfs/$data_version/data.$SOURCE.dd.ge/data.$SOURCE.dd.ge.parquet 
-# spath=data/ml.dfs/$data_version/data.$SOURCE.dd.ge/data.$SOURCE.dd.ge.splits 
+dpath=data/ml.dfs/$data_version/data.$src.dd.ge/data.$src.dd.ge.parquet 
+# spath=data/ml.dfs/$data_version/data.$src.dd.ge/data.$src.dd.ge.splits 
 
 echo "dpath: $dpath"
 # echo "spath: $spath"
@@ -29,10 +31,10 @@ lc_sizes=10
 min_size=2000
 epoch=400
 
-gout=$outdir/lc.${SOURCE}.${model}.log_scale
+gout=$outdir/lc.${src}.${model}.log_scale
 lc_step_scale=log
 
-# gout=$outdir/lc.${SOURCE}.${model}.linear_scale
+# gout=$outdir/lc.${src}.${model}.linear_scale
 # lc_step_scale=linear
 
 echo "gout:  $gout"

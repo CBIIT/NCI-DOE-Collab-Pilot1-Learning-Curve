@@ -5,10 +5,9 @@
 # bash scripts/lc_lgb.bash gdsc1
 # bash scripts/lc_lgb.bash gdsc2
 
-SOURCE=$1
-
+src=ctrp
 model="lgb"
-outdir=lc.out.${SOURCE}.${model}
+outdir=lc.out.${src}.${model}
 mkdir -p $outdir
 echo "Outdir $outdir"
 
@@ -16,8 +15,8 @@ echo "Source: $SOURCE"
 echo "Model:  $model"
 
 data_version=July2020
-dpath=data/ml.dfs/$data_version/data.$SOURCE.dd.ge/data.$SOURCE.dd.ge.parquet
-# spath=data/ml.dfs/$data_version/data.$SOURCE.dd.ge/data.$SOURCE.dd.ge.splits
+dpath=data/ml.dfs/$data_version/data.$src.dd.ge/data.$src.dd.ge.parquet
+# spath=data/ml.dfs/$data_version/data.$src.dd.ge/data.$src.dd.ge.splits
 
 echo "dpath: $dpath"
 # echo "spath: $spath"
@@ -27,10 +26,10 @@ lc_sizes=10
 min_size=1000
 n_jobs=8
 
-gout=$outdir/lc.${SOURCE}.${model}.log_scale
+gout=$outdir/lc.${src}.${model}.log_scale
 lc_step_scale=log
 
-# gout=$outdir/lc.${SOURCE}.${model}.linear_scale
+# gout=$outdir/lc.${src}.${model}.linear_scale
 # lc_step_scale=linear
 
 echo "gout:  $gout"
