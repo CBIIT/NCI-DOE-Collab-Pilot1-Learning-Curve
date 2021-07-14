@@ -18,13 +18,14 @@ To set up the Python environment needed to generate learning curves:
    conda activate lrn_crv
 ```
 
-To download data that is required to build a tidy (tabular) dataset. The tidy dataset is then used to train the models and generate learning curves:
+Download data that is required to build a tidy (tabular) dataset. The tidy dataset is then used to train the models and generate learning curves.
 1. Create an account on the Model and Data Clearinghouse [MoDaC](modac.cancer.gov). 
 2. Follow the instructions in the Training section below.
 3. When prompted by the training and test scripts, enter your MoDaC credentials.
 
 
 ### Generte the tidy ML dataset
+Once the data is downloaded from MoDaC, run the script to create the ML dataset.
 ```bash
 ./scripts/gen_dfs_new.bash
 ```
