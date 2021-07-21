@@ -140,7 +140,7 @@ def parse_args(args):
 
 
 def run(args):
-    import pdb; pdb.set_trace()
+    # import pdb; pdb.set_trace()
     t0 = time()
     datapath = Path(args['datapath']).resolve()
 
