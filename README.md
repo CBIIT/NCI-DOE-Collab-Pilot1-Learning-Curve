@@ -15,12 +15,10 @@ The current code can be used by a data scientist experienced in Python and the d
 Learning curves is a general method that can be applied to any supervised learning model. In this repo we utilize this method to generate learning curves for two drug response prediction models: LightGBM regressor and a neural network regressor. These curves can be used to evaluate and compare the data scaling properties of prediction modeles across a range of training set sizes rather for a fixed sample size. 
 
 ### Components:	
-The following components are in the Learning Curves dataset in the Model and Data Clearinghouse (MoDaC):
-* Tabular data: 
-  * Machine learning data for training prediction models and generating learning curves.
-* Learning curve data:
-  * Raw learning curve data (lc.out.ctrp.lgb) generated from training LightGBM regressor with the CTRP drug response dataset.
-  * Raw learning curve data (lc.out.ctrp.nn_reg0) generated from training a neural network regressor with the CTRP drug response dataset.
+This capability provides the following components:
+* Scripts that implements the learning curve method using two machine learning models: LightGBM and Neural Networks.
+* Examples on how to apply the learning curve method for models that predict the drug response using data from CTRP. 
+
 
 ### Technical Details:
 Refer to this [README](./src/README.md).
