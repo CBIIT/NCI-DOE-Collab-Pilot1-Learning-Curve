@@ -1,5 +1,5 @@
 ### Description of the Learning Curve Algorithm
-A dataset is split into training (T), validation (V), and test (E). The model is trained on subsets of the training set (T). In order to support early stopping, the training is terminated if the generalization performance on the validation set V has not improved over a predefined number of training iterations. Upon training completion, the model predicts the response for each cell-drug pair in the test set E. Note that models use the same validation and test sets (V and E) irrespective of the training set size. The aggregated performance scores are then plotted as a function of the training set size.
+A dataset is split into training, validation, and test. A model is trained on subsets of the training set, in order by size of the subset, from smallest to largest. In contrast, the model uses the same validation and test sets irrespective of the training set size. In order to support early stopping, the training is terminated if the generalization performance on the validation set has not improved over a predefined number of training iterations. Upon training completion, the model makes predictions based on the data. (The provided models predict the response for each cell-drug pair in the test set.) The aggregated performance scores describe how accurate the model’s predictions are. These scores are then plotted as a function of the training set size.
 
 
 ### Expected Outcomes
@@ -19,7 +19,7 @@ To set up the Python environment needed to generate learning curves:
 ```
 
 Download data that is required to build a tabular dataset. The tabular dataset is then used to train the models and generate learning curves.
-1. Create an account on the Model and Data Clearinghouse [MoDaC](https://modac.cancer.gov). 
+1. Create an account on the Model and Data Clearinghouse ([MoDaC](https://modac.cancer.gov)). 
 2. Run the script [./utils/download_data.py](./utils/download_data.py). This script downloads from MoDaC the following data (originally from the Cancer Therapeutics Response Portal, CTRP): 
    * Drug descriptors
    * RNA-Seq expressions
@@ -28,7 +28,7 @@ Download data that is required to build a tabular dataset. The tabular dataset i
 
 
 ### Generate the Tabular Machine Learning Dataset
-Once the data is downloaded from MoDaC, run the following script to create the machine learning ready DataFrame:
+After downloading the data from MoDaC, run the following script to create the machine learning ready DataFrame:
 ```bash
 ./scripts/gen_dfs_new.bash
 ```
