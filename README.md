@@ -19,6 +19,9 @@ This capability provides the following components:
 * Scripts that implements the learning curve method using two machine learning models: LightGBM and Neural Networks.
 * Examples on how to apply the learning curve method for models that predict the drug response using data from CTRP. 
 
+### Publication: 
+Partin, A., Brettin, T., Evrard, Y.A. et al. Learning curves for drug response prediction in cancer cell lines. BMC Bioinformatics 22, 252 (2021). [https://doi.org/10.1186/s12859-021-04163-y](https://doi.org/10.1186/s12859-021-04163-y)
+
 
 ### Technical Details:
 Refer to this [README](./src/README.md).
