@@ -20,7 +20,7 @@ To set up the Python environment needed to generate learning curves:
 
 Download data that is required to build a tabular dataset. The tabular dataset is then used to train the models and generate learning curves.
 1. Create an account on the Model and Data Clearinghouse ([MoDaC](https://modac.cancer.gov)). 
-2. Run the script [./utils/download_data.py](./utils/download_data.py). This script downloads from MoDaC the following data (originally from the Cancer Therapeutics Response Portal, CTRP): 
+2. Run the script [./src/utils/download_data.py](./utils/download_data.py). This script downloads from MoDaC the following data (originally from the Cancer Therapeutics Response Portal, CTRP): 
    * Drug descriptors
    * RNA-Seq expressions
    * Drug responses  
