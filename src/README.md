@@ -34,7 +34,7 @@ After downloading the data from MoDaC, run the following script to create the ma
 ```
 
 #### Description of the Data
-The drug response DataFrame contains tabular data for training models and generating learning curves: `data/ml.dfs/July2020/data.ctrp.dd.ge/data.ctrp.dd.ge.parquet`
+The drug response DataFrame contains tabular data for training models and generating learning curves: `./data/ml.dfs/July2020/data.ctrp.dd.ge/data.ctrp.dd.ge.parquet`
 * The DataFrame contains 254,566 of unique cell-drug pairs (samples, rows) and 2,815 columns (including RNA-Seq and drug descriptors, and metadata).
 * There are 812 unique cell lines and 495 unique drugs (note that not all cell-drug combinations were screened)
 * RNA-Seq: 976 features (genes)
