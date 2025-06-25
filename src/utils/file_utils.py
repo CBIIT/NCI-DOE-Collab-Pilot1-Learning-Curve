@@ -7,6 +7,7 @@ import sys
 import shutil
 import hashlib
 from six.moves.urllib.request import urlopen
+from urllib.parse import urlparse
 from six.moves.urllib.error import URLError, HTTPError
 
 import requests
@@ -112,7 +113,8 @@ def get_file(fname, origin, untar=False,
     '''
 
     if download:
-        if 'modac.cancer.gov' in origin:
+        from urllib.parse import urlparse
+        if urlparse(origin).hostname == 'modac.cancer.gov':
             get_file_from_modac(fpath, origin)
         else:
             print('Downloading data from', origin)
